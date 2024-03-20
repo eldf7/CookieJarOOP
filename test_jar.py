@@ -1,129 +1,137 @@
 import pytest
 from jar import Jar
 
+SMALL_TESTER = 6
+DEFAULT_TESTER = 12
+EXTRA_TESTER = 24
+NEGATIVE_TESTER = -1
+NON_INT_TESTER = "cat"
+
 
 def test_initializing_capacity():
     jar1 = Jar()
-    jar2 = Jar(24)
-    assert jar1.capacity == 12
-    assert jar2.capacity == 24
+    jar2 = Jar(SMALL_TESTER)
+    jar3 = Jar(EXTRA_TESTER)
+    assert jar1.capacity == DEFAULT_TESTER
+    assert jar2.capacity == SMALL_TESTER
+    assert jar3.capacity == EXTRA_TESTER
 
 
 def test_non_positive_int_capacity():
     with pytest.raises(ValueError):
-        Jar("cat")
+        Jar(NON_INT_TESTER)
     with pytest.raises(ValueError):
-        Jar(-1)
+        Jar(NEGATIVE_TESTER)
 
 
 def test_deposit():
     jar = Jar()
-    jar.deposit(5)
-    assert jar.size == 5
+    jar.deposit(SMALL_TESTER)
+    assert jar.size == SMALL_TESTER
 
 
 def test_over_deposit():
     jar = Jar()
     with pytest.raises(ValueError):
-        jar.deposit(20)
+        jar.deposit(EXTRA_TESTER)
 
 
 def test_non_positive_int_deposit():
     jar = Jar()
     with pytest.raises(ValueError):
-        jar.deposit("cat")
+        jar.deposit(NON_INT_TESTER)
     with pytest.raises(ValueError):
-        jar.deposit(-1)
+        jar.deposit(NEGATIVE_TESTER)
 
 
 def test_withdraw():
     jar = Jar()
-    jar.size = 5  # Bypass jar.deposit() method to avoid the method itself has errors
-    jar.withdraw(4)
-    assert jar.size == 1
+    jar.size = DEFAULT_TESTER  # Bypass jar.deposit() method to avoid the method itself has errors
+    jar.withdraw(SMALL_TESTER)  # Withdrawing SMALL_TESTER amount
+    assert jar.size == (DEFAULT_TESTER - SMALL_TESTER)
 
 
 def test_over_withdraw():
     jar = Jar()
     with pytest.raises(ValueError):
-        jar.withdraw(20)
+        jar.withdraw(EXTRA_TESTER)
 
 
 def test_non_positive_int_withdraw():
     jar = Jar()
     with pytest.raises(ValueError):
-        jar.withdraw("cat")
+        jar.withdraw(NON_INT_TESTER)
     with pytest.raises(ValueError):
-        jar.withdraw(-1)
+        jar.withdraw(NEGATIVE_TESTER)
 
 
 def test_transfer():
     jar1 = Jar()
-    jar2 = Jar(24)
-    jar1.size = 6
-    jar2.size = 6
+    jar2 = Jar()
+    jar1.size = SMALL_TESTER
+    jar2.size = SMALL_TESTER
 
-    jar1.transfer(6, jar2)
-    assert jar1.size == 0
-    assert jar2.size == 12
+    jar1.transfer(SMALL_TESTER, jar2)
+    assert jar1.size == (SMALL_TESTER - SMALL_TESTER)
+    assert jar2.size == (SMALL_TESTER + SMALL_TESTER)
 
 
 def test_over_withdraw_transfer():
     jar1 = Jar()
     jar2 = Jar()
-    jar1.size = 5
+    jar1.size = SMALL_TESTER
     jar2.size = 0
-    original1 = jar1.size
-    original2 = jar2.size
-    jar1.transfer(6, jar2)
+    jar1_pretransfer = jar1.size
+    jar2_pretransfer = jar2.size
+    jar1.transfer(SMALL_TESTER + 1, jar2)
 
-    # Transferring 6, when 5 available.
-    # jar1 and jar2 need to have the same number of cookies they had before transfer as transfer failed
-    assert jar1.size == original1
-    assert jar2.size == original2
+    # Transferring SMALL_TESTER + 1, when SMALL_TESTER amount available.
+    # jar1 and jar2 need to have the same number of cookies they had before transfer as transfer fails
+    assert jar1.size == jar1_pretransfer
+    assert jar2.size == jar2_pretransfer
 
 
-def test_over_deposit_transfer():
-    jar1 = Jar(24)
+def test_over_capacity_transfer():
+    jar1 = Jar(EXTRA_TESTER)
     jar2 = Jar()
-    jar1.size = 20
+    jar1.size = EXTRA_TESTER
     jar2.size = 0
-    original1 = jar1.size
-    original2 = jar2.size
-    jar1.transfer(13, jar2)
+    jar1_pretransfer = jar1.size
+    jar2_pretransfer = jar2.size
 
-    # Transferring 13 when jar2 only fits 12.
-    # jar1 and jar2 need to have the same number of cookies they had before transfer as transfer failed
-    assert jar1.size == original1
-    assert jar2.size == original2
+    # Transferring DEFAULT_TESTER + 1 when jar2 only fits DEFAULT_TESTER (12).
+    # jar1 and jar2 need to have the same number of cookies they had before transfer as transfer fails
+    jar1.transfer(DEFAULT_TESTER + 1, jar2)
+    assert jar1.size == jar1_pretransfer
+    assert jar2.size == jar2_pretransfer
 
 
 def test_non_positive_int_transfer():
     jar1 = Jar()
     jar2 = Jar()
-    jar1.size = 5
+    jar1.size = SMALL_TESTER
     jar2.size = 0
-    original1 = jar1.size
-    original2 = jar2.size
-    jar1.transfer(-1, jar2)
+    jar1_pretransfer = jar1.size
+    jar2_pretransfer = jar2.size
 
-    # Transferring invalid -1 number of cookies.
-    # jar1 and jar2 need to have the same number of cookies they had before transfer as transfer failed
-    assert jar1.size == original1
-    assert jar2.size == original2
+    # Transferring invalid NEGATIVE_TESTER number of cookies.
+    # jar1 and jar2 need to have the same number of cookies they had before transfer as transfer fails
+    jar1.transfer(NEGATIVE_TESTER, jar2)
+    assert jar1.size == jar1_pretransfer
+    assert jar2.size == jar2_pretransfer
 
-    # Transferring invalid "cat" number of cookies.
-    # jar1 and jar2 need to have the same number of cookies they had before transfer as transfer failed
-    jar1.transfer("cat", jar2)
-    assert jar1.size == original1
-    assert jar2.size == original2
+    # Transferring invalid NON_INT_TESTER of cookies.
+    # jar1 and jar2 need to have the same number of cookies they had before transfer as transfer fails
+    jar1.transfer(NON_INT_TESTER, jar2)
+    assert jar1.size == jar1_pretransfer
+    assert jar2.size == jar2_pretransfer
 
 
 def test_str():
     jar = Jar()
     assert str(jar) == ""
-    jar.deposit(1)
-    assert str(jar) == "🍪"
-    jar.deposit(11)
+    jar.deposit(SMALL_TESTER)
+    assert str(jar) == "🍪🍪🍪🍪🍪🍪"
+    jar.deposit(DEFAULT_TESTER - SMALL_TESTER)
     assert str(jar) == "🍪🍪🍪🍪🍪🍪🍪🍪🍪🍪🍪🍪"
 
