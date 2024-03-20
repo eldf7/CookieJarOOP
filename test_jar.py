@@ -144,4 +144,3 @@ def test_str():
     assert str(normal_jar) == "🍪🍪🍪🍪🍪🍪"
     normal_jar.deposit(DEFAULT_TESTER - SMALL_TESTER)
     assert str(normal_jar) == "🍪🍪🍪🍪🍪🍪🍪🍪🍪🍪🍪🍪"
-
