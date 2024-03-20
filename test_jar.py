@@ -46,14 +46,14 @@ def test_non_positive_int_deposit():
 
 def test_withdraw():
     normal_jar = Jar()
-    normal_jar.size = DEFAULT_TESTER  # Bypass jar.deposit() method to avoid the method itself has errors
-    normal_jar.withdraw(SMALL_TESTER)  # Withdrawing SMALL_TESTER amount
+    normal_jar.deposit(DEFAULT_TESTER)
+    normal_jar.withdraw(SMALL_TESTER)
     assert normal_jar.size == (DEFAULT_TESTER - SMALL_TESTER)
 
 
 def test_over_withdraw():
     normal_jar = Jar()
-    normal_jar.size = DEFAULT_TESTER
+    normal_jar.deposit(DEFAULT_TESTER)
 
     # Over-withdrawing EXTRA_TESTER amount with DEFAULT_TESTER amount available
     with pytest.raises(ValueError):
@@ -62,7 +62,7 @@ def test_over_withdraw():
 
 def test_non_positive_int_withdraw():
     normal_jar = Jar()
-    normal_jar.size = DEFAULT_TESTER
+    normal_jar.deposit(DEFAULT_TESTER)
 
     # Withdrawing invalid negative and non-integer amount
     with pytest.raises(ValueError):
@@ -73,10 +73,9 @@ def test_non_positive_int_withdraw():
 
 def test_transfer():
     normal_jar1 = Jar()
-    normal_jar1.size = DEFAULT_TESTER
+    normal_jar1.deposit(DEFAULT_TESTER)
 
     normal_jar2 = Jar()
-    normal_jar2.size = 0
 
     normal_jar1.transfer(SMALL_TESTER, normal_jar2)
     assert normal_jar1.size == (DEFAULT_TESTER - SMALL_TESTER)
@@ -85,12 +84,11 @@ def test_transfer():
 
 def test_over_withdraw_transfer():
     normal_jar1 = Jar()
-    normal_jar1.size = SMALL_TESTER
+    normal_jar1.deposit(SMALL_TESTER)
     normal_jar1_pretransfer = normal_jar1.size
 
     normal_jar2 = Jar()
-    normal_jar2.size = 0
-    normal_jar2_pretransfer = normal_jar2.size
+    normal_jar2_pretransfer = normal_jar2.size  # Empty normal_jar2
 
     # Transferring DEFAULT_TESTER amount with SMALL_TESTER amount available.
     # jar1 and jar2 need to have the same number of cookies they had before transfer as transfer fails
@@ -101,12 +99,11 @@ def test_over_withdraw_transfer():
 
 def test_over_capacity_transfer():
     big_jar = Jar(EXTRA_TESTER)
-    big_jar.size = EXTRA_TESTER
+    big_jar.deposit(EXTRA_TESTER)
     big_jar_pretransfer = big_jar.size
 
     normal_jar = Jar()
-    normal_jar.size = 0
-    normal_jar_pretransfer = normal_jar.size
+    normal_jar_pretransfer = normal_jar.size  # Empty normal_jar
 
     # Transferring EXTRA_TESTER amount when jar2 only fits DEFAULT_TESTER.
     # jar1 and jar2 need to have the same number of cookies they had before transfer as transfer fails
@@ -117,12 +114,11 @@ def test_over_capacity_transfer():
 
 def test_non_positive_int_transfer():
     normal_jar1 = Jar()
-    normal_jar1.size = SMALL_TESTER
+    normal_jar1.deposit(SMALL_TESTER)
     normal_jar1_pretransfer = normal_jar1.size
 
     normal_jar2 = Jar()
-    normal_jar2.size = 0
-    normal_jar2_pretransfer = normal_jar2.size
+    normal_jar2_pretransfer = normal_jar2.size  # Empty normal_jar2
 
     # Transferring invalid negative number of cookies.
     # jar1 and jar2 need to have the same number of cookies they had before transfer as transfer fails
