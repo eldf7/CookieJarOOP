@@ -106,7 +106,7 @@ def test_over_capacity_transfer():
     normal_jar_pretransfer = normal_jar.size  # Empty normal_jar
 
     # Transferring EXTRA_TESTER amount when jar2 only fits DEFAULT_TESTER.
-    # jar1 and jar2 need to have the same number of cookies they had before transfer as transfer fails
+    # big_jar and normal_jar need to have the same number of cookies they had before transfer as transfer fails
     big_jar.transfer(EXTRA_TESTER, normal_jar)
     assert big_jar.size == big_jar_pretransfer
     assert normal_jar.size == normal_jar_pretransfer
